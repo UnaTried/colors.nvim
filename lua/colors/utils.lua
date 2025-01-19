@@ -76,19 +76,19 @@ function M.create_highlight(active_buffer_id, ns_id, data, options)
 	else
 		local background_color = colors.get_background_color()
 		local reversed_background_color = colors.get_reversed_background_color()
-		--[[if background_color == color_value then
+		if background_color == color_value then
 			pcall(vim.api.nvim_set_hl, 0, highlight_group, {
 				fg = color_value,
 				bg = reversed_background_color,
 				default = true,
 			})
-		else ]]
+		else
 			pcall(vim.api.nvim_set_hl, 0, highlight_group, {
 				fg = color_value,
 				bg = background_color,
 				default = true,
 			})
-		--end
+		end
 	end
 
 	if options.render == M.render_options.virtual then

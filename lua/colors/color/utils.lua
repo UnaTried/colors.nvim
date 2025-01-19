@@ -186,7 +186,7 @@ end
 ---@param color string
 ---@return string|nil
 
---[[function M.get_background_color()
+function M.get_background_color()
     -- Get the 'Normal' highlight group properties
     local normal_hl = vim.api.nvim_get_hl(0, { name = "Normal" })
 
@@ -198,16 +198,6 @@ end
 
     -- Return nil if no background color is set
     return nil
-end ]]
-
-function M.get_background_color()
-	local color_column = vim.api.nvim_get_hl(0, { name = "ColorColumn" })
-
-	if color_column and color_column.bg then
-		return string.format("#%06x", color_column.bg)
-	end
-
-	return nil
 end
 
 -- Ensure bit32 module is available for Lua 5.1 (Lua 5.2+ uses the bit library by default)

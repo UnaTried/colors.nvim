@@ -228,14 +228,11 @@ function M.get_reversed_background_color()
         local inverted_color = bit.lshift(inverted_red, 16) + bit.lshift(inverted_green, 8) + inverted_blue
 
         -- Return the inverted color as a hex string
-        return string.format("#%06x", inverted_color)
+        return inverted_color
     end
 
     -- Return nil if no background color is set
     return nil
 end
-
-
-
 
 return M

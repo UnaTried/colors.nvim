@@ -1,4 +1,4 @@
-local table_utils = require "colors.nvim.table_utils"
+local table_utils = require "colors.table_utils"
 
 local M = {}
 

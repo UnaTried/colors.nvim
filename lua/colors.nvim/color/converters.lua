@@ -1,4 +1,4 @@
-local patterns = require("colors-nvim.color.patterns")
+local patterns = require("colors.color.patterns")
 
 local M = {}
 

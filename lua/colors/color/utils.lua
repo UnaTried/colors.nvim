@@ -200,7 +200,6 @@ function M.get_background_color()
     return nil
 end
 
--- Ensure bit32 module is available for Lua 5.1 (Lua 5.2+ uses the bit library by default)
 local bit = require('bit')
 
 function M.get_reversed_background_color()
@@ -209,7 +208,7 @@ function M.get_reversed_background_color()
 
     -- Check if 'bg' (background color) exists
     if normal_hl and normal_hl.bg then
-        -- Extract the individual RGB components from the bg integer using bit32
+        -- Extract the individual RGB components from the bg integer using bit
         local red = bit.rshift(normal_hl.bg, 16) -- Extract the red component
         local green = bit.rshift(normal_hl.bg, 8) -- Extract the green component
         local blue = normal_hl.bg                 -- Extract the blue component
@@ -227,12 +226,13 @@ function M.get_reversed_background_color()
         -- Combine the inverted components back into an integer
         local inverted_color = bit.lshift(inverted_red, 16) + bit.lshift(inverted_green, 8) + inverted_blue
 
-        -- Return the inverted color as a hex string
+        -- Return the inverted color as an integer (not hex string)
         return inverted_color
     end
 
     -- Return nil if no background color is set
     return nil
 end
+
 
 return M

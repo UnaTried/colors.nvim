@@ -185,76 +185,33 @@ end
 ---Returns a contrast friendly color that matches the current color for reading purposes
 ---@param color string
 ---@return string|nil
-function M.get_background_color_from_hex_color(color)
-	local rgb_table = converters.hex_to_rgb(color)
 
-	if rgb_table == nil or #rgb_table < 3 then
-		return nil
-	end
+function M.get_background_color()
+    -- Get the 'Normal' highlight group properties
+    local normal_hl = vim.api.nvim_get_hl(0, { name = "Normal" })
 
-	-- see: https://stackoverflow.com/a/3943023/16807083
-	rgb_table = vim.tbl_map(
-		function(value)
-			value = value / 255
-
-			if value <= 0.04045 then
-				return value / 12.92
-			end
-
-			return ((value + 0.055) / 1.055) ^ 2.4
-		end,
-		rgb_table
-	)
-
-	local luminance = (0.2126 * rgb_table[1]) + (0.7152 * rgb_table[2]) + (0.0722 * rgb_table[3])
-
-	return luminance > 0.179 and "#000000" or "#ffffff"
-end
-
-function M.get_reversed_background_color_from_hex_color(color)
-	local rgb_table = converters.hex_to_rgb(color)
-
-	if rgb_table == nil or #rgb_table < 3 then
-		return nil
-	end
-
-	-- see: https://stackoverflow.com/a/3943023/16807083
-	rgb_table = vim.tbl_map(
-		function(value)
-			value = value / 255
-
-			if value <= 0.04045 then
-				return value / 12.92
-			end
-
-			return ((value + 0.055) / 1.055) ^ 2.4
-		end,
-		rgb_table
-	)
-
-	local luminance = (0.2126 * rgb_table[1]) + (0.7152 * rgb_table[2]) + (0.0722 * rgb_table[3])
-
-	return luminance > 0.179 and "#000000" or "#ffffff"
-end
-
-function M.get_complementary_color_from_hex_color(color)
-    local rgb_table = converters.hex_to_rgb(color)
-
-    if rgb_table == nil or #rgb_table < 3 then
-        return nil
+    -- Check if 'bg' (background color) exists
+    if normal_hl and normal_hl.bg then
+        -- Return background color as a hex string
+        return string.format("#%06x", normal_hl.bg)
     end
 
-    -- Compute the complementary color
-    rgb_table = vim.tbl_map(
-		function(value)
-        	return 255 - value
-    	end, 
-		rgb_table
-	)
+    -- Return nil if no background color is set
+    return nil
+end
 
-	local luminance = (0.2126 * rgb_table[1]) + (0.7152 * rgb_table[2]) + (0.0722 * rgb_table[3])
+function M.get_reversed_background_color()
+    -- Get the 'Normal' highlight group properties
+    local normal_hl = vim.api.nvim_get_hl(0, { name = "Normal" })
 
-	return luminance > 0.179 and "#000000" or "#ffffff"
+    -- Check if 'bg' (background color) exists
+    if normal_hl and normal_hl.bg then
+        -- Return background color as a hex string
+        return string.format("#%06x", normal_hl.bg)
+    end
+
+    -- Return nil if no background color is set
+    return nil
 end
 
 

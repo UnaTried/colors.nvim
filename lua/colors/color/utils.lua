@@ -201,7 +201,7 @@ end
 end ]]
 
 function M.get_background_color()
-	local color_column = vim.api.nvim_get_hl(0, { name = "ColorColumn" })
+	local color_column = vim.api.nvim_get_hl(0, { name = "StatusLineNC" })
 
 	if color_column and color_column.bg then
 		return string.format("#%06x", color_column.bg)

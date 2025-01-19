@@ -201,7 +201,7 @@ function M.get_background_color()
 end
 
 -- Ensure bit32 module is available for Lua 5.1 (Lua 5.2+ uses the bit library by default)
-local bit = require('bit32')
+local bit = require('bit')
 
 function M.get_reversed_background_color()
     -- Get the 'Normal' highlight group properties

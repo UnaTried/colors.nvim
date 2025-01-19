@@ -200,7 +200,14 @@ function M.get_background_color()
     return nil
 end
 
--- Ensure bit32 module is available for Lua 5.1 (Lua 5.2+ uses the bit library by default)
+function M.get_reversed_background_color()
+	local color_column = vim.api.nvim_get_hl(0, { name = "ColorColumn" })
+
+	if color_column and color_column.bg then
+		return string.format("#%06x", color_column.bg)
+end
+
+--[[ Ensure bit32 module is available for Lua 5.1 (Lua 5.2+ uses the bit library by default)
 local bit = require('bit')
 
 function M.get_reversed_background_color()
@@ -233,6 +240,6 @@ function M.get_reversed_background_color()
 
     -- Return nil if no background color is set
     return nil
-end
+end ]]
 
 return M

@@ -11,13 +11,13 @@ if vim.g.loaded_nvim_highlight_colors ~= nil then
 end
 vim.g.loaded_nvim_highlight_colors = 1
 
-local symbol = utils.render_options.symbol
+local symbol_render = utils.render_options.symbol
 local background = utils.render_options.background
 local foreground = utils.render_options.foreground
 local row_offset = 4
 local is_loaded = false
 local options = {
-	render = symbol,
+	render = symbol_render,
 	enable_hex = true,
 	enable_rgb = true,
 	enable_hsl = true,

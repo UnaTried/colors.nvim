@@ -9,8 +9,6 @@ M.var_regex = "%-%-[%d%a-_]+"
 M.var_declaration_regex = M.var_regex .. ":%s*" .. M.hex_regex
 M.var_usage_regex = "var%(" .. M.var_regex .. "%)"
 
-M.tailwind_prefix = "!?%a+"
-
 ---Checks whether a color is short hex
 ---@return boolean
 function M.is_short_hex_color(color)

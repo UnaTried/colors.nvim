@@ -11,23 +11,26 @@ if vim.g.loaded_nvim_highlight_colors ~= nil then
 end
 vim.g.loaded_nvim_highlight_colors = 1
 
-local render_options = utils.render_options
-local row_offset = 2
+local symbol = utils.render_options.symbol
+local background = utils.render_options.background
+local foreground = utils.render_options.foreground
+local row_offset = 4
 local is_loaded = false
 local options = {
-	render = render_options.background,
+	render = symbol,
 	enable_hex = true,
 	enable_rgb = true,
 	enable_hsl = true,
 	enable_var_usage = true,
 	enable_named_colors = true,
 	enable_short_hex = true,
-	enable_tailwind = false,
 	custom_colors = nil,
-	virtual_symbol = "■",
-	virtual_symbol_prefix = "",
-	virtual_symbol_suffix = " ",
-	virtual_symbol_position = "inline",
+	symbol {
+		symbol = "⬤",
+		symbol_prefix = " ",
+		symbol_suffix = "",
+		symbol_position = "eow",
+	}
 	exclude_filetypes = {},
 	exclude_buftypes = {}
 }
@@ -77,10 +80,6 @@ function M.highlight_colors(min_row, max_row, active_buffer_id)
 		NAMED_COLORS = {
 			is_enabled = options.enable_named_colors,
 			patterns = { colors.get_css_named_color_pattern() }
-		},
-		TAILWIND = {
-			is_enabled = options.enable_tailwind and not utils.has_tailwind_css_lsp(),
-			patterns = { colors.get_tailwind_named_color_pattern() }
 		}
 	}
 
@@ -115,7 +114,6 @@ function M.highlight_colors(min_row, max_row, active_buffer_id)
 		)
 	end
 
-	utils.highlight_with_lsp(active_buffer_id, ns_id, positions, options)
 end
 
 
@@ -150,11 +148,11 @@ function M.clear_highlights(active_buffer_id)
 			local buffer_id = active_buffer_id ~= nil and active_buffer_id or 0
 
 			vim.api.nvim_buf_clear_namespace(buffer_id, ns_id, 0, utils.get_last_row_index())
-			local virtual_texts = vim.api.nvim_buf_get_extmarks(buffer_id, ns_id, 0, -1, {})
+			local symbol_texts = vim.api.nvim_buf_get_extmarks(buffer_id, ns_id, 0, -1, {})
 
-			if #virtual_texts then
-				for _, virtual_text in pairs(virtual_texts) do
-					local extmart_id = virtual_text[1]
+			if #symbol_texts then
+				for _, symbol_text in pairs(symbol_texts) do
+					local extmart_id = symbol_text[1]
 					if (tonumber(extmart_id) ~= nil) then
 						vim.api.nvim_buf_del_extmark(buffer_id, ns_id, extmart_id)
 					end
@@ -207,7 +205,7 @@ function M.format(entry, item)
 	if cached then
 		vim.api.nvim_set_hl(0, cached.hl_group, { fg = cached.color_hex, default = true })
 		item.abbr_hl_group = cached.hl_group
-		item.abbr = options.virtual_symbol
+		item.abbr = options.symbol
 	end
 	return item
 end
@@ -268,7 +266,6 @@ vim.api.nvim_create_autocmd({
 	"TextChanged",
 	"InsertLeave",
 	"TextChangedP",
-	"LspAttach",
 	"BufEnter",
 }, {
 	callback = M.handle_change_autocmd_callback,

@@ -1,6 +1,5 @@
 local buffer_utils = require("colors.buffer_utils")
 local css_named_colors = require("colors.named-colors.css")
-local tailwind_named_colors = require("colors.named-colors.tailwind")
 local converters = require("colors.color.converters")
 local patterns = require("colors.color.patterns")
 
@@ -36,13 +35,6 @@ function M.get_color_value(color, row_offset, custom_colors, enable_short_hex )
 
 	if (patterns.is_named_color({M.get_css_named_color_pattern()}, color)) then
 		return M.get_css_named_color_value(color)
-	end
-
-	if (patterns.is_named_color({M.get_tailwind_named_color_pattern()}, color)) then
-		local tailwind_color = M.get_tailwind_named_color_value(color)
-		if (tailwind_color ~= nil) then
-			return tailwind_color
-		end
 	end
 
 	if (row_offset ~= nil and patterns.is_var_color(color)) then
@@ -93,33 +85,6 @@ end
 function M.get_css_named_color_value(color)
 	local color_name = string.match(color, "%a+")
 	return css_named_colors[color_name]
-end
-
----Returns the hex value of a tailwind color
----@param color string
----@return string|nil
----@usage get_tailwind_named_color_value('bg-white') => Returns '#FFFFFF'
-function M.get_tailwind_named_color_value(color)
-	local tailwind_color_name = color
-	-- Removing tailwind prefix from color name: text-slate-500 -> slate-500
-	local _, end_index = string.find(tailwind_color_name, patterns.tailwind_prefix .. "%-")
-	if end_index then
-		tailwind_color_name = string.sub(tailwind_color_name, end_index + 1, string.len(tailwind_color_name))
-	end
-	local tailwind_color = tailwind_named_colors[tailwind_color_name]
-	if tailwind_color == nil then
-		return nil
-	end
-	local rgb_table = M.get_rgb_values(tailwind_color)
-	if (#rgb_table >= 3) then
-		return converters.rgb_to_hex(rgb_table[1], rgb_table[2], rgb_table[3])
-	end
-end
-
----Returns a pattern for tailwind colors
----@return string
-function M.get_tailwind_named_color_pattern()
-	return patterns.tailwind_prefix .. "%-%a+[%-%d+]*"
 end
 
 ---Returns a pattern for CSS colors

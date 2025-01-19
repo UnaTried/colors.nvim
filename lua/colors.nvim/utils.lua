@@ -1,5 +1,5 @@
-local colors = require("colors-nvim.color.utils")
-local table_utils = require("colors-nvim.table_utils")
+local colors = require("colors.color.utils")
+local table_utils = require("colors.table_utils")
 
 local M = {
 	render_options = {
@@ -36,7 +36,7 @@ end
 ---@param color_value string
 ---@return string
 function M.create_highlight_name(color_value)
-	return 'colors-nvim-' .. string.gsub(color_value, "#", ""):gsub("[!(),%s%.-/%%=:\"']+", "")
+	return 'colors-' .. string.gsub(color_value, "#", ""):gsub("[!(),%s%.-/%%=:\"']+", "")
 end
 
 ---Creates the highlight based on the received params

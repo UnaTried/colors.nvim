@@ -169,47 +169,6 @@ end
 ---@type table<string,nil|false|{ hl_group: string, color_hex: string }>
 local format_cache = {}
 
----Formats nvim-cmp to showcase colors in the autocomplete
----@usage 
----Add the following to your nvim-cmp setup
----cmp.setup({
----...other configs
----formatting = {
----    format = require("nvim-highlight-colors").format
----}
-function M.format(entry, item)
-	item.menu = item.kind
-	item.kind = item.abbr
-	item.kind_hl_group = ''
-	item.abbr = ''
-
-	if item.menu ~= "Color" then
-		return item
-	end
-
-	local entryDoc = entry
-	if type(entryDoc) == "table" then
-		entryDoc = vim.tbl_get(entry or {}, "completion_item", "documentation")
-	end
-	if type(entryDoc) ~= "string" then
-		return item
-	end
-
-	local cached = format_cache[entryDoc]
-	if cached == nil then
-		local color_hex = colors.get_color_value(entryDoc)
-		cached = color_hex and { hl_group = utils.create_highlight_name("fg-" .. color_hex), color_hex = color_hex }
-			or false
-		format_cache[entryDoc] = cached
-	end
-	if cached then
-		vim.api.nvim_set_hl(0, cached.hl_group, { fg = cached.color_hex, default = true })
-		item.abbr_hl_group = cached.hl_group
-		item.abbr = options.symbol
-	end
-	return item
-end
-
 ---Callback to manually show the highlights
 function M.turn_on()
 	local buffers = vim.fn.getbufinfo({ buflisted = true })

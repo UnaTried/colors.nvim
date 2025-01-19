@@ -5,7 +5,7 @@ local M = {
 	render_options = {
 		background = "background",
 		foreground = "foreground",
-		symbol = 'symbol'
+		symbol = "symbol"
 	}
 }
 
@@ -43,8 +43,7 @@ end
 ---@param active_buffer_id number
 ---@param ns_id number
 ---@param data {row: number, start_column: number, end_column: number, value: string}
----@param options {symbol: table, custom_colors: table, render: string, enable_short_hex: boolean}
----@param symbol {symbol: string, symbol_prefix: string, symbol_suffix: string, symbol_position: 'eow' | 'sow'}
+---@param options {symbol: {symbol: string, symbol_prefix: string, symbol_suffix: string, symbol_position: 'eow' | 'sow'},custom_colors: table, render: string, enable_short_hex: boolean}
 ---
 ---For `options.custom_colors`, a table with the following structure is expected:
 ---* `label`: A string representing a template for the color name, likely using placeholders for the theme name. (e.g., '%-%-theme%-primary%-color')
@@ -119,8 +118,7 @@ end
 ---@param ns_id number
 ---@param data {row: number, start_column: number, end_column: number, value: string}
 ---@param highlight_group string
----@param options {symbol: table, custom_colors: table, render: string, enable_short_hex: boolean}
----@param symbol {symbol: string, symbol_prefix: string, symbol_suffix: string, symbol_position: 'eow' | 'sow'}
+---@param options {symbol: {symbol: string, symbol_prefix: string, symbol_suffix: string, symbol_position: 'eow' | 'sow'},custom_colors: table, render: string, enable_short_hex: boolean}
 function M.highlight_extmarks(active_buffer_id, ns_id, data, highlight_group, options)
 	local start_extmark_row = data.row + 1
 	local start_extmark_column = data.start_column - 1
@@ -177,26 +175,26 @@ function M.highlight_extmarks(active_buffer_id, ns_id, data, highlight_group, op
 end
 
 ---Returns the symbol text(extmark) position based on the user preferences
----@param options {symbol_position: 'eol' | 'sow'}
----@return 'eol' | 'sow'
+---@param options {symbol_position: 'eow' | 'sow'}
+---@return 'eow' | 'sow'
 function M.get_symbol_text_position(options)
 	local nvim_version = vim.version()
 
 	-- Safe guard for older neovim versions
 	if nvim_version.major == 0 and nvim_version.minor < 10 then
-		return 'eol'
+		return 'eow'
 	end
 
 	return options.symbol_position
 end
 
 ---Returns the symbol text(extmark) column index position based on the user preferences
----@param symbol_text_position 'eol' | 'sow'
+---@param symbol_text_position 'eow' | 'sow'
 ---@param start_extmark_column number
 ---@param end_extmark_column number
 ---@return number
 function M.get_symbol_text_column(symbol_text_position, start_extmark_column, end_extmark_column)
-	if symbol_text_position == 'eol' then
+	if symbol_text_position == 'eow' then
 		return start_extmark_column
 	end
 

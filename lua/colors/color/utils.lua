@@ -186,7 +186,7 @@ end
 ---@param color string
 ---@return string|nil
 
-function M.get_background_color()
+--[[function M.get_background_color()
     -- Get the 'Normal' highlight group properties
     local normal_hl = vim.api.nvim_get_hl(0, { name = "Normal" })
 
@@ -198,9 +198,9 @@ function M.get_background_color()
 
     -- Return nil if no background color is set
     return nil
-end
+end ]]
 
-function M.get_reversed_background_color()
+function M.get_background_color()
 	local color_column = vim.api.nvim_get_hl(0, { name = "ColorColumn" })
 
 	if color_column and color_column.bg then

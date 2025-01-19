@@ -69,7 +69,7 @@ function M.create_highlight(active_buffer_id, ns_id, data, options)
 		else ]]
 			pcall(vim.api.nvim_set_hl, 0, highlight_group, {
 				fg = color_value,
-				bg = reversed_background_color,
+				bg = background_color,
 				default = true,
 			})
 		--end

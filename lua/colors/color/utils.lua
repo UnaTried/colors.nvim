@@ -210,9 +210,14 @@ function M.get_reversed_background_color()
     -- Check if 'bg' (background color) exists
     if normal_hl and normal_hl.bg then
         -- Extract the individual RGB components from the bg integer using bit32
-        local red = bit.rshift(normal_hl.bg, 16) & 0xFF  -- Extract the red component
-        local green = bit.rshift(normal_hl.bg, 8) & 0xFF -- Extract the green component
-        local blue = normal_hl.bg & 0xFF                 -- Extract the blue component
+        local red = bit.rshift(normal_hl.bg, 16) -- Extract the red component
+        local green = bit.rshift(normal_hl.bg, 8) -- Extract the green component
+        local blue = normal_hl.bg                 -- Extract the blue component
+
+        -- Apply the bitwise AND operation to isolate each component
+        red = bit.band(red, 0xFF)
+        green = bit.band(green, 0xFF)
+        blue = bit.band(blue, 0xFF)
 
         -- Invert the colors by subtracting each component from 255
         local inverted_red = 255 - red
@@ -229,6 +234,7 @@ function M.get_reversed_background_color()
     -- Return nil if no background color is set
     return nil
 end
+
 
 
 

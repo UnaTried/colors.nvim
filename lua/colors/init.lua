@@ -4,8 +4,8 @@ local buffer_utils = require("colors.buffer_utils")
 local colors = require("colors.color.utils")
 local color_patterns = require("colors.color.patterns")
 local ns_id = vim.api.nvim_create_namespace("colors")
-local bgc = require("colors.utils")
-vim.notify(bgc, vim.log.levels.INFO)
+local u = require("colors.utils")
+vim.notify(u.background_color, vim.log.levels.INFO)
 
 if vim.g.loaded_nvim_highlight_colors ~= nil then
 	return {}

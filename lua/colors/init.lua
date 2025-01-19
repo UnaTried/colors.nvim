@@ -30,7 +30,7 @@ local options = {
 		symbol_prefix = " ",
 		symbol_suffix = "",
 		symbol_position = "eow",
-	}
+	},
 	exclude_filetypes = {},
 	exclude_buftypes = {}
 }

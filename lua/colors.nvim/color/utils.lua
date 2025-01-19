@@ -1,8 +1,8 @@
-local buffer_utils = require("colors-nvim.buffer_utils")
-local css_named_colors = require("colors-nvim.named-colors.css")
-local tailwind_named_colors = require("colors-nvim.named-colors.tailwind")
-local converters = require("colors-nvim.color.converters")
-local patterns = require("colors-nvim.color.patterns")
+local buffer_utils = require("colors.buffer_utils")
+local css_named_colors = require("colors.named-colors.css")
+local tailwind_named_colors = require("colors.named-colors.tailwind")
+local converters = require("colors.color.converters")
+local patterns = require("colors.color.patterns")
 
 local M = {}
 

@@ -205,6 +205,7 @@ function M.get_reversed_background_color()
 
 	if color_column and color_column.bg then
 		return string.format("#%06x", color_column.bg)
+	end
 end
 
 --[[ Ensure bit32 module is available for Lua 5.1 (Lua 5.2+ uses the bit library by default)

@@ -246,14 +246,12 @@ vim.api.nvim_create_user_command("HighlightColors",
 			M.turn_off()
 		elseif arg == "toggle" then
 			M.toggle()
-		elseif arg == "isactive" then
-			M.is_active()
 		end
 	end,
 	{
 		nargs = 1,
 		complete = function()
-			return { "On", "Off", "Toggle", "IsActive" }
+			return { "On", "Off", "Toggle" }
 		end,
 		desc = "Config color highlight"
 	}

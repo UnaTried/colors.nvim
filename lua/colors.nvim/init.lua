@@ -1,9 +1,9 @@
-local utils = require("colors-nvim.utils")
-local table_utils = require("colors-nvim.table_utils")
-local buffer_utils = require("colors-nvim.buffer_utils")
-local colors = require("colors-nvim.color.utils")
-local color_patterns = require("colors-nvim.color.patterns")
-local ns_id = vim.api.nvim_create_namespace("colors-nvim")
+local utils = require("colors.utils")
+local table_utils = require("colors.table_utils")
+local buffer_utils = require("colors.buffer_utils")
+local colors = require("colors.color.utils")
+local color_patterns = require("colors.color.patterns")
+local ns_id = vim.api.nvim_create_namespace("colors")
 
 if vim.g.loaded_nvim_highlight_colors ~= nil then
 	return {}

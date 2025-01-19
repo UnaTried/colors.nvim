@@ -200,16 +200,19 @@ function M.get_background_color()
     return nil
 end
 
+-- Ensure bit32 module is available for Lua 5.1 (Lua 5.2+ uses the bit library by default)
+local bit = require('bit32')
+
 function M.get_reversed_background_color()
     -- Get the 'Normal' highlight group properties
     local normal_hl = vim.api.nvim_get_hl(0, { name = "Normal" })
 
     -- Check if 'bg' (background color) exists
     if normal_hl and normal_hl.bg then
-        -- Extract the individual RGB components from the bg integer
-        local red = (normal_hl.bg >> 16) & 0xFF  -- Extract the red component
-        local green = (normal_hl.bg >> 8) & 0xFF -- Extract the green component
-        local blue = normal_hl.bg & 0xFF         -- Extract the blue component
+        -- Extract the individual RGB components from the bg integer using bit32
+        local red = bit.rshift(normal_hl.bg, 16) & 0xFF  -- Extract the red component
+        local green = bit.rshift(normal_hl.bg, 8) & 0xFF -- Extract the green component
+        local blue = normal_hl.bg & 0xFF                 -- Extract the blue component
 
         -- Invert the colors by subtracting each component from 255
         local inverted_red = 255 - red
@@ -217,7 +220,7 @@ function M.get_reversed_background_color()
         local inverted_blue = 255 - blue
 
         -- Combine the inverted components back into an integer
-        local inverted_color = (inverted_red << 16) + (inverted_green << 8) + inverted_blue
+        local inverted_color = bit.lshift(inverted_red, 16) + bit.lshift(inverted_green, 8) + inverted_blue
 
         -- Return the inverted color as a hex string
         return string.format("#%06x", inverted_color)
@@ -226,6 +229,7 @@ function M.get_reversed_background_color()
     -- Return nil if no background color is set
     return nil
 end
+
 
 
 return M

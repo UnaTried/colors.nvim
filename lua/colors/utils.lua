@@ -57,11 +57,11 @@ function M.create_highlight(active_buffer_id, ns_id, data, options)
 
 	local highlight_group = M.create_highlight_name(options.render .. data.value .. color_value)
 
-	if options.render == M.render_options.background then
-		local foreground_color = colors.get_foreground_color_from_hex_color(color_value)
+	if options.render == M.render_options.foreground then
+		local background_color = colors.get_background_color_from_hex_color(color_value)
 		pcall(vim.api.nvim_set_hl, 0, highlight_group, {
-			fg = foreground_color,
-			bg = color_value,
+			fg = color_value,
+			bg = background_color,
 			default = true,
 		})
 	else

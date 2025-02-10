@@ -1,6 +1,8 @@
 # colors.nvim
 This is a work-in-progress Neovim plugin to preview and edit colors, like in vscode!
 
+# [Check out the Wiki](https://github.com/UnaTried/colors.nvim/wiki)
+
 ## It supports
 - Realtime color highlighting
 - Hex, rgb, hsl, CSS variables, and Tailwind CSS

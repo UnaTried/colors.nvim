@@ -18,7 +18,7 @@ There are some problems, but I would probably need some time to fix them.
 ```
 require('colors').setup({
 	display = { "foreground", "symbol", }, -- foreground can be replaced with background
-    symbol = {
+	symbol = {
 		symbol = "⬤", -- ■ so you don't need to look
 		symbol_prefix = " ",
 		symbol_suffix = "",

@@ -10,7 +10,7 @@ This is a work-in-progress Neovim plugin to preview and edit colors, like in vsc
 
 There are some problems, but I would probably need some time to fix them.
 
-# Configuration
+## Configuration
 <details>
 <summary>Default configuration</summary>
 <br>
@@ -40,7 +40,7 @@ require('colors').setup({
 <details>
 <summary><a href="https://github.com/hrsh7th/nvim-cmp">nvim-cmp</a> integration</summary>
 <br>
-<details style="padding-left: 1em;">
+<details>
 <summary>Common configuration style</summary>
 <br>
 
@@ -53,7 +53,7 @@ require("cmp").setup({
 })
 ```
 </details>
-<details style="padding-left: 1em;">
+<dl><dd><details>
 <summary> In lua</summary>
 <br>
 
@@ -69,6 +69,7 @@ require("cmp").setup({
 })
 ```
 </details>
+</dd></dl>
 </details>
 <details>
 <summary><a href="https://github.com/Saghen/blink.cmp">blink.cmp</a> integration</summary>
@@ -139,5 +140,5 @@ require("cmp").setup({
 ```
 </details>
 
-# Special thanks to
+## Special thanks to
 - Breno Prata for [brenoprata10/nvim-highlight-colors](https://github.com/brenoprata10/nvim-highlight-colors)

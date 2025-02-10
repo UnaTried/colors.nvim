@@ -1,5 +1,6 @@
 local buffer_utils = require("colors.buffer_utils")
 local css_named_colors = require("colors.named-colors.css")
+local tailwind_named_colors = require("colors.named-colors.tailwind")
 local converters = require("colors.color.converters")
 local patterns = require("colors.color.patterns")
 
@@ -35,6 +36,13 @@ function M.get_color_value(color, row_offset, custom_colors, enable_short_hex )
 
 	if (patterns.is_named_color({M.get_css_named_color_pattern()}, color)) then
 		return M.get_css_named_color_value(color)
+	end
+
+	if (patterns.is_named_color({M.get_tailwind_named_color_pattern()}, color)) then
+		local tailwind_color = M.get_tailwind_named_color_value(color)
+		if (tailwind_color ~= nil) then
+			return tailwind_color
+		end
 	end
 
 	if (row_offset ~= nil and patterns.is_var_color(color)) then
@@ -85,6 +93,33 @@ end
 function M.get_css_named_color_value(color)
 	local color_name = string.match(color, "%a+")
 	return css_named_colors[color_name]
+end
+
+---Returns the hex value of a tailwind color
+---@param color string
+---@return string|nil
+---@usage get_tailwind_named_color_value('bg-white') => Returns '#FFFFFF'
+function M.get_tailwind_named_color_value(color)
+	local tailwind_color_name = color
+	-- Removing tailwind prefix from color name: text-slate-500 -> slate-500
+	local _, end_index = string.find(tailwind_color_name, patterns.tailwind_prefix .. "%-")
+	if end_index then
+		tailwind_color_name = string.sub(tailwind_color_name, end_index + 1, string.len(tailwind_color_name))
+	end
+	local tailwind_color = tailwind_named_colors[tailwind_color_name]
+	if tailwind_color == nil then
+		return nil
+	end
+	local rgb_table = M.get_rgb_values(tailwind_color)
+	if (#rgb_table >= 3) then
+		return converters.rgb_to_hex(rgb_table[1], rgb_table[2], rgb_table[3])
+	end
+end
+
+---Returns a pattern for tailwind colors
+---@return string
+function M.get_tailwind_named_color_pattern()
+	return patterns.tailwind_prefix .. "%-%a+[%-%d+]*"
 end
 
 ---Returns a pattern for CSS colors
@@ -150,54 +185,30 @@ end
 ---Returns a contrast friendly color that matches the current color for reading purposes
 ---@param color string
 ---@return string|nil
+function M.get_foreground_color_from_hex_color(color)
+	local rgb_table = converters.hex_to_rgb(color)
 
-function M.get_background_color()
-    -- Get the 'Normal' highlight group properties
-    local normal_hl = vim.api.nvim_get_hl(0, { name = "Normal" })
+	if rgb_table == nil or #rgb_table < 3 then
+		return nil
+	end
 
-    -- Check if 'bg' (background color) exists
-    if normal_hl and normal_hl.bg then
-        -- Return background color as a hex string
-        return string.format("#%06x", normal_hl.bg)
-    end
+	-- see: https://stackoverflow.com/a/3943023/16807083
+	rgb_table = vim.tbl_map(
+		function(value)
+			value = value / 255
 
-    -- Return nil if no background color is set
-    return nil
-end
+			if value <= 0.04045 then
+				return value / 12.92
+			end
 
--- Ensure bit32 module is available for Lua 5.1 (Lua 5.2+ uses the bit library by default)
-local bit = require('bit')
+			return ((value + 0.055) / 1.055) ^ 2.4
+		end,
+		rgb_table
+	)
 
-function M.get_reversed_background_color()
-    -- Get the 'Normal' highlight group properties
-    local normal_hl = vim.api.nvim_get_hl(0, { name = "Normal" })
+	local luminance = (0.2126 * rgb_table[1]) + (0.7152 * rgb_table[2]) + (0.0722 * rgb_table[3])
 
-    -- Check if 'bg' (background color) exists
-    if normal_hl and normal_hl.bg then
-        -- Extract the individual RGB components from the bg integer using bit32
-        local red = bit.rshift(normal_hl.bg, 16) -- Extract the red component
-        local green = bit.rshift(normal_hl.bg, 8) -- Extract the green component
-        local blue = normal_hl.bg                 -- Extract the blue component
-
-        -- Apply the bitwise AND operation to isolate each component
-        red = bit.band(red, 0xFF)
-        green = bit.band(green, 0xFF)
-        blue = bit.band(blue, 0xFF)
-
-        -- Invert the colors by subtracting each component from 255
-        local inverted_red = 255 - red
-        local inverted_green = 255 - green
-        local inverted_blue = 255 - blue
-
-        -- Combine the inverted components back into an integer
-        local inverted_color = bit.lshift(inverted_red, 16) + bit.lshift(inverted_green, 8) + inverted_blue
-
-        -- Return the inverted color as a hex string
-        return string.format("#%06x", inverted_color)
-    end
-
-    -- Return nil if no background color is set
-    return nil
+	return luminance > 0.179 and "#000000" or "#ffffff"
 end
 
 return M

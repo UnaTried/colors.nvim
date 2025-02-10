@@ -94,3 +94,10 @@ function M.remove_color_usage_pattern(match)
 end
 
 return M
+
+-- #ffffff =
+-- white =
+--       = white
+-- 	  = #ffffff
+-- #ffffff = white
+-- white = #ffffff

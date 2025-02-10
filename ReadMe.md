@@ -40,6 +40,7 @@ require('colors').setup({
 <details>
 <summary><a href="https://github.com/hrsh7th/nvim-cmp">nvim-cmp</a> integration</summary>
 <br>
+<dl><dd>
 <details>
 <summary>Common configuration style</summary>
 <br>
@@ -53,6 +54,7 @@ require("cmp").setup({
 })
 ```
 </details>
+</dl></dd>
 <dl><dd><details>
 <summary> In lua</summary>
 <br>

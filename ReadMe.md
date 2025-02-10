@@ -11,7 +11,7 @@ This is a work-in-progress Neovim plugin to preview and edit colors, like in vsc
 There are some problems, but I would probably need some time to fix them.
 
 # Configuration
-<details open>
+<details>
 <summary>Default configuration</summary>
 <br>
 
@@ -37,10 +37,10 @@ require('colors').setup({
 })
 ```
 </details>
-<details open>
+<details>
 <summary><a href="https://github.com/hrsh7th/nvim-cmp">nvim-cmp</a> integration</summary>
 <br>
-<details open style="padding-left: 1em;">
+<details style="padding-left: 1em;">
 <summary>Common configuration style</summary>
 <br>
 
@@ -53,7 +53,7 @@ require("cmp").setup({
 })
 ```
 </details>
-<details open style="padding-left: 1em;">
+<details style="padding-left: 1em;">
 <summary> In lua</summary>
 <br>
 
@@ -70,7 +70,7 @@ require("cmp").setup({
 ```
 </details>
 </details>
-<details open>
+<details>
 <summary><a href="https://github.com/Saghen/blink.cmp">blink.cmp</a> integration</summary>
 <br>
 
@@ -115,7 +115,7 @@ require("blink.cmp").setup {
 ```
 </details>
 </details>
-<details open>
+<details>
 <summary><a href="https://github.com/onsails/lspkind.nvim">lspkind.nvim</a> integration</summary>
 <br>
 

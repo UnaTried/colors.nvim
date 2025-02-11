@@ -5,16 +5,16 @@ local colors = require("colors.color.utils")
 local color_patterns = require("colors.color.patterns")
 local ns_id = vim.api.nvim_create_namespace("colors")
 
-if vim.g.loaded_nvim_highlight_colors ~= nil then
+if vim.g.loaded_colors ~= nil then
 	return {}
 end
-vim.g.loaded_nvim_highlight_colors = 1
+vim.g.loaded_colors = 1
 
 local displays = utils.displays
 local row_offset = 2
 local is_loaded = false
 local options = {
-	display = { displays.foreground },
+	display = { displays.foreground, displays.symbol },
 	enable_hex = true,
 	enable_rgb = true,
 	enable_hsl = false,
@@ -24,10 +24,10 @@ local options = {
 	enable_tailwind = false,
 	custom_colors = nil,
 	symbol = {
-		symbol = "⬤",
-		symbol_prefix = "",
-		symbol_suffix = " ",
-		symbol_position = "eow",
+		display = "⬤",
+		prefix = "",
+		suffix = " ",
+		position = "eow"
 	},
 	exclude_filetypes = {},
 	exclude_buftypes = {},
@@ -59,11 +59,9 @@ local function validate_displays(user_display)
 			end
 		end
 		if has_background and has_foreground then
-			for i, v in ipairs(filtered_display) do
-				if v == displays.foreground then
-					filtered_display[i] = displays.symbol
-					break
-				end
+			vim.notify("colors.nvim: You cannot use background and foreground simultaneously!", vim.log.levels.ERROR)
+			while(is_loaded == true) do
+				vim.api.nvim_command('Colors Off')
 			end
 		end
 	end
@@ -187,7 +185,7 @@ function M.clear_highlights(active_buffer_id)
 	pcall(function()
 		local buffer_id = active_buffer_id ~= nil and active_buffer_id or 0
 
-		vim.api.nvim_buf_clear_namespace(buffer_id, ns_id, 0, utils.get_last_row_index())
+		vim.api.nvim_buf_clear_namespace(buffer_id, ns_id, 1, utils.get_last_row_index())
 		local symbol_texts = vim.api.nvim_buf_get_extmarks(buffer_id, ns_id, 0, -1, {})
 
 		if #symbol_texts then

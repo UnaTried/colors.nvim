@@ -5,7 +5,7 @@ local M = {
 	displays = {
 		background = "background",
 		foreground = "foreground",
-		symbol = "symbol"
+		symbol	   = 'symbol'
 	}
 }
 
@@ -43,7 +43,7 @@ end
 ---@param active_buffer_id number
 ---@param ns_id number
 ---@param data {row: number, start_column: number, end_column: number, value: string}
----@param options {custom_colors: table, display: string, symbol: {symbol: string, symbol_prefix: string, symbol_suffix: string, symbol_position: 'sow' | 'eow'}, enable_short_hex: boolean}
+---@param options {custom_colors: table, display: string, symbol: { display: string, prefix: string, suffix: string, position: 'sow' | 'eow' | 'eol'}, enable_short_hex: boolean}
 ---
 ---For `options.custom_colors`, a table with the following structure is expected:
 ---* `label`: A string representing a template for the color name, likely using placeholders for the theme name. (e.g., '%-%-theme%-primary%-color')
@@ -57,24 +57,43 @@ function M.create_highlight(active_buffer_id, ns_id, data, options)
 
 	local highlight_group = M.create_highlight_name(options.display .. data.value .. color_value)
 
-	if options.display == M.displays.background then
-		local foreground_color = colors.get_foreground_color_from_hex_color(color_value)
-		pcall(vim.api.nvim_set_hl, 0, highlight_group, {
-			fg = foreground_color,
-			bg = color_value,
-			default = true,
-		})
+	local background_color = colors.get_background_color()
+	local reversed_background_color = colors.get_reversed_background_color()
+
+ 	if color_value == background_color then
+		if options.display == M.displays.background then
+			pcall(vim.api.nvim_set_hl, 0, highlight_group, {
+				fg = reversed_background_color,
+				bg = color_value,
+				default = true,
+			})
+		else 
+			pcall(vim.api.nvim_set_hl, 0, highlight_group, {
+				fg = color_value,
+				bg = reversed_background_color,
+				default = true,
+			})
+		end
 	else
-		pcall(vim.api.nvim_set_hl, 0, highlight_group, {
-			fg = color_value,
-			default = true,
-		})
+		if options.display == M.displays.background then
+			pcall(vim.api.nvim_set_hl, 0, highlight_group, {
+				fg = background_color,
+				bg = color_value,
+				default = true,
+			})
+		else 
+			pcall(vim.api.nvim_set_hl, 0, highlight_group, {
+				fg = color_value,
+				bg = background_color,
+				default = true,
+			})
+		end
 	end
+
 
 	if options.display == M.displays.symbol then
 		pcall(
 			M.highlight_extmarks,
-			active_buffer_id,
 			ns_id,
 			data,
 			highlight_group,
@@ -101,13 +120,13 @@ end
 ---@param ns_id number
 ---@param data {row: number, start_column: number, end_column: number, value: string}
 ---@param highlight_group string
----@param options {custom_colors: table, display: string, symbol: {symbol: string, symbol_prefix: string, symbol_suffix: string, symbol_position: 'sow' | 'eow'}, enable_short_hex: boolean}
+---@param options {custom_colors: table, display: string, symbol: { display: string, prefix: string, suffix: string, position: 'sow' | 'eow' | 'eol'}, enable_short_hex: boolean}
 function M.highlight_extmarks(active_buffer_id, ns_id, data, highlight_group, options)
 	local start_extmark_row = data.row + 1
 	local start_extmark_column = data.start_column - 1
-	local text_position = M.get_text_position(options)
-	local text_column = M.get_text_column(
-		text_position,
+	local symbol_text_position = M.get_symbol_text_position(options)
+	local symbol_text_column = M.get_symbol_text_column(
+		symbol_text_position,
 		start_extmark_column,
 		data.end_column
 	)
@@ -115,7 +134,7 @@ function M.highlight_extmarks(active_buffer_id, ns_id, data, highlight_group, op
 		active_buffer_id,
 		ns_id,
 		{start_extmark_row, start_extmark_column},
-		{start_extmark_row, text_column},
+		{start_extmark_row, symbol_text_column},
 		{details = true}
 	)
 	local is_already_highlighted = #table_utils.filter(
@@ -144,12 +163,12 @@ function M.highlight_extmarks(active_buffer_id, ns_id, data, highlight_group, op
 		active_buffer_id,
 		ns_id,
 		start_extmark_row,
-		text_column,
+		symbol_text_column,
 		{
 
-			sym_text_pos = text_position == 'eow' and 'sow' or text_position,
+			sym_text_pos = symbol_text_position == 'eow' and 'sow' or symbol_text_position,
 			sym_text = {{
-				options.symbol.symbol_prefix .. options.symbol.symbol .. options.symbol.symbol_suffix,
+				options.symbol.prefix .. options.symbol.display .. options.symbol.suffix,
 				vim.api.nvim_get_hl_id_by_name(highlight_group)
 			}},
 			hl_mode = "combine",
@@ -158,30 +177,30 @@ function M.highlight_extmarks(active_buffer_id, ns_id, data, highlight_group, op
 end
 
 ---Returns the symbol text(extmark) position based on the user preferences
----@param options {symbol_position: 'sow' | 'eow'}
----@return 'sow' | 'eow'
-function M.get_text_position(options)
+---@param options {position: 'sow' | 'eol' | 'eow'}
+---@return 'sow' | 'eol' | 'eow'
+function M.get_symbol_text_position(options)
 	local nvim_version = vim.version()
 
 	-- Safe guard for older neovim versions
 	if nvim_version.major == 0 and nvim_version.minor < 10 then
-		return 'sow'
+		return 'eol'
 	end
 
-	return options.symbol.symbol_position
+	return options.symbol.position
 end
 
 ---Returns the symbol text(extmark) column index position based on the user preferences
----@param text_position 'sow' | 'eow'
+---@param symbol_text_position 'sow' | 'eol' | 'eow'
 ---@param start_extmark_column number
 ---@param end_extmark_column number
 ---@return number
-function M.get_text_column(text_position, start_extmark_column, end_extmark_column)
-	if text_position == 'sow' then
+function M.get_symbol_text_column(symbol_text_position, start_extmark_column, end_extmark_column)
+	if symbol_text_position == 'eol' then
 		return start_extmark_column
 	end
 
-	if text_position == 'eow' then
+	if symbol_text_position == 'eow' then
 		return end_extmark_column
 	end
 
@@ -192,7 +211,7 @@ end
 ---@param active_buffer_id number
 ---@param ns_id number
 ---@param positions {row: number, start_column: number, end_column: number, value: string}[]
----@param options {custom_colors: table, display: string, symbol: {symbol: string, symbol_prefix: string, symbol_suffix: string, symbol_position: 'sow' | 'eow'}, enable_short_hex: boolean}
+---@param options {custom_colors: table, display: string, symbol: { display: string, prefix: string, suffix: string, position: 'sow' | 'eol' | 'eow'}, enable_short_hex: boolean}
 function M.highlight_with_lsp(active_buffer_id, ns_id, positions, options)
 	local param = { textDocument = vim.lsp.util.make_text_document_params() }
 	local clients = M.get_lsp_clients()
@@ -222,7 +241,7 @@ end
 ---@param active_buffer_id number
 ---@param ns_id number
 ---@param positions {row: number, start_column: number, end_column: number, value: string}[]
----@param options {custom_colors: table, display: string, symbol: {symbol: string, symbol_prefix: string, symbol_suffix: string, symbol_position: 'sow' | 'eow'}, enable_short_hex: boolean}
+---@param options {custom_colors: table, display: string, symbol: { display string, prefix: string, suffix: string, position: 'sow' | 'eol' | 'eow'}, enable_short_hex: boolean}
 function M.highlight_lsp_document_color(response, active_buffer_id, ns_id, positions, options)
 	local results = {}
 	if response == nil then

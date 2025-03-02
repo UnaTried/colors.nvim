@@ -16,9 +16,9 @@ local is_loaded = false
 local options = {
 	display = { displays.symbol, displays.foreground },
 	symbol = {
-		text = "■",
-		prefix = " ",
-		suffix = " ",
+		text = "■", -- One more: 
+		prefix = "◄", -- Some more: ▸, ◜
+		suffix = "►", -- Some more: ◂, ◞
 		position = "eow",
 	},
 	enable_hex = true,

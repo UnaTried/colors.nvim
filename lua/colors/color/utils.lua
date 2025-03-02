@@ -219,27 +219,22 @@ end
 ---Returns a contrast friendly color that matches the current color for reading purposes
 ---@param color string
 ---@return string|nil
-function M.get_foreground_color_from_hex_color(color)
-	local rgb_table = converters.hex_to_rgb(color)
+function M.get_background_color(color)
+	return ("#" .. string.format("%06x", vim.api.nvim_get_hl(0, { name = "Normal" }).bg))
+end
 
-	if rgb_table == nil or #rgb_table < 3 then
-		return nil
-	end
-
-	-- see: https://stackoverflow.com/a/3943023/16807083
-	rgb_table = vim.tbl_map(function(value)
-		value = value / 255
-
-		if value <= 0.04045 then
-			return value / 12.92
-		end
-
-		return ((value + 0.055) / 1.055) ^ 2.4
-	end, rgb_table)
-
-	local luminance = (0.2126 * rgb_table[1]) + (0.7152 * rgb_table[2]) + (0.0722 * rgb_table[3])
-
-	return luminance > 0.179 and "#000000" or "#ffffff"
+function M.get_inverted_background_color(color)
+	return (
+		"#"
+		.. string.format(
+			"%06x",
+			0xFFFFFF
+				- tonumber(
+					string.format("%06x", vim.api.nvim_get_hl(0, { name = "Normal" }).bg),
+					16
+				)
+		)
+	)
 end
 
 return M

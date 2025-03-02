@@ -10,63 +10,66 @@ if vim.g.loaded_colors ~= nil then
 end
 vim.g.loaded_colors = 1
 
-local displays = utils.displays
+local render_options = utils.render_options
 local row_offset = 2
 local is_loaded = false
 local options = {
-	display = { displays.foreground, displays.symbol },
+	render = { render_options.virtual, render_options.foreground },
 	enable_hex = true,
 	enable_rgb = true,
-	enable_hsl = false,
-	enable_var_usage = false,
-	enable_named_colors = false,
+	enable_hsl = true,
+	enable_hsl_without_function = true,
+	enable_var_usage = true,
+	enable_named_colors = true,
 	enable_short_hex = true,
 	enable_tailwind = false,
 	custom_colors = nil,
-	symbol = {
-		display = "⬤",
-		prefix = "",
-		suffix = " ",
-		position = "eow"
-	},
+	virtual_symbol = "■",
+	virtual_symbol_prefix = "",
+	virtual_symbol_suffix = " ",
+	virtual_symbol_position = "sow",
 	exclude_filetypes = {},
 	exclude_buftypes = {},
+	exclude_buffer = function(bufnr) end,
 }
 
 local M = {}
 
-local function validate_displays(user_display)
-	local valid_display_types = {
-		[displays.background] = true,
-		[displays.foreground] = true,
-		[displays.symbol] = true,
+local function validate_render_options(user_render)
+	local valid_render_types = {
+		[render_options.background] = true,
+		[render_options.foreground] = true,
+		[render_options.virtual] = true,
 	}
-	local filtered_display = {}
-	for _, r in ipairs(user_display) do
-		if valid_display_types[r] then
-			table.insert(filtered_display, r)
+
+	local filtered_render = {}
+	for _, r in ipairs(user_render) do
+		if valid_render_types[r] then
+			table.insert(filtered_render, r)
 		end
 	end
 
-	if #filtered_display >= 2 then
+	if #filtered_render >= 2 then
 		local has_background = false
 		local has_foreground = false
-		for _, v in ipairs(filtered_display) do
-			if v == displays.background then
+		for _, v in ipairs(filtered_render) do
+			if v == render_options.background then
 				has_background = true
-			elseif v == displays.foreground then
+			elseif v == render_options.foreground then
 				has_foreground = true
 			end
 		end
 		if has_background and has_foreground then
-			vim.notify("colors.nvim: You cannot use background and foreground simultaneously!", vim.log.levels.ERROR)
-			while(is_loaded == true) do
-				vim.api.nvim_command('Colors Off')
+			for i, v in ipairs(filtered_render) do
+				if v == render_options.foreground then
+					filtered_render[i] = render_options.virtual
+					break
+				end
 			end
 		end
 	end
 
-	return filtered_display
+	return filtered_render
 end
 
 ---Plugin entry point
@@ -76,10 +79,10 @@ function M.setup(user_options)
 	if user_options ~= nil and user_options ~= {} then
 		for key, _ in pairs(user_options) do
 			if user_options[key] ~= nil then
-				if key == "display" and type(user_options[key]) == "table" then
-					options[key] = validate_displays(user_options[key])
-				elseif key == "display" and type(user_options[key]) == "string" then
-					options[key] = validate_displays({ user_options[key] })
+				if key == "render" and type(user_options[key]) == "table" then
+					options[key] = validate_render_options(user_options[key])
+				elseif key == "render" and type(user_options[key]) == "string" then
+					options[key] = validate_render_options({ user_options[key] })
 				else
 					options[key] = user_options[key]
 				end
@@ -94,7 +97,6 @@ end
 ---@param active_buffer_id number
 function M.highlight_colors(min_row, max_row, active_buffer_id)
 	local patterns = {}
-
 	local patterns_config = {
 		HEX = {
 			is_enabled = options.enable_hex,
@@ -110,6 +112,10 @@ function M.highlight_colors(min_row, max_row, active_buffer_id)
 		HSL = {
 			is_enabled = options.enable_hsl,
 			patterns = { color_patterns.hsl_regex },
+		},
+		HSL_WITHOUT_FUNC = {
+			is_enabled = options.enable_hsl_without_function,
+			patterns = { color_patterns.hsl_without_func_regex },
 		},
 		VAR_USAGE = {
 			is_enabled = options.enable_var_usage,
@@ -139,15 +145,20 @@ function M.highlight_colors(min_row, max_row, active_buffer_id)
 		end
 	end
 
-	local positions = buffer_utils.get_positions_by_regex(patterns, min_row - 1, max_row, active_buffer_id, row_offset)
-
+	local positions = buffer_utils.get_positions_by_regex(
+		patterns,
+		min_row - 1,
+		max_row,
+		active_buffer_id,
+		row_offset
+	)
 	for _, data in pairs(positions) do
-		for _, display_type in ipairs(options.display) do
+		for _, render_type in ipairs(options.render) do
 			utils.create_highlight(
 				active_buffer_id,
 				ns_id,
 				data,
-				vim.tbl_extend("force", options, { display = display_type }) -- Pass display type dynamically
+				vim.tbl_extend("force", options, { render = render_type }) -- Pass render type dynamically
 			)
 		end
 	end
@@ -157,15 +168,15 @@ end
 
 ---Refreshes current highlights within the specified buffer
 ---@param active_buffer_id number
----@param should_clear_highlights boolean Indicates whether the current highlights should be deleted before displaying
+---@param should_clear_highlights boolean Indicates whether the current highlights should be deleted before rendering
 function M.refresh_highlights(active_buffer_id, should_clear_highlights)
 	local buffer_id = active_buffer_id ~= nil and active_buffer_id or 0
-
 	if
 		not vim.api.nvim_buf_is_valid(active_buffer_id)
 		or vim.bo[buffer_id].buftype == "terminal"
 		or vim.tbl_contains(options.exclude_filetypes, vim.bo[buffer_id].filetype)
 		or vim.tbl_contains(options.exclude_buftypes, vim.bo[buffer_id].buftype)
+		or (options.exclude_buffer and options.exclude_buffer(buffer_id))
 	then
 		return
 	end
@@ -184,13 +195,12 @@ end
 function M.clear_highlights(active_buffer_id)
 	pcall(function()
 		local buffer_id = active_buffer_id ~= nil and active_buffer_id or 0
+		vim.api.nvim_buf_clear_namespace(buffer_id, ns_id, 0, utils.get_last_row_index())
+		local virtual_texts = vim.api.nvim_buf_get_extmarks(buffer_id, ns_id, 0, -1, {})
 
-		vim.api.nvim_buf_clear_namespace(buffer_id, ns_id, 1, utils.get_last_row_index())
-		local symbol_texts = vim.api.nvim_buf_get_extmarks(buffer_id, ns_id, 0, -1, {})
-
-		if #symbol_texts then
-			for _, symbol_text in pairs(symbol_texts) do
-				local extmart_id = symbol_text[1]
+		if #virtual_texts then
+			for _, virtual_text in pairs(virtual_texts) do
+				local extmart_id = virtual_text[1]
 				if tonumber(extmart_id) ~= nil then
 					vim.api.nvim_buf_del_extmark(buffer_id, ns_id, extmart_id)
 				end
@@ -235,14 +245,18 @@ function M.format(entry, item)
 	local cached = format_cache[entryDoc]
 	if cached == nil then
 		local color_hex = colors.get_color_value(entryDoc)
-		cached = color_hex and { hl_group = utils.create_highlight_name("fg-" .. color_hex), color_hex = color_hex }
+		cached = color_hex
+				and {
+					hl_group = utils.create_highlight_name("fg-" .. color_hex),
+					color_hex = color_hex,
+				}
 			or false
 		format_cache[entryDoc] = cached
 	end
 	if cached then
 		vim.api.nvim_set_hl(0, cached.hl_group, { fg = cached.color_hex, default = true })
 		item.abbr_hl_group = cached.hl_group
-		item.abbr = options.symbol.display
+		item.abbr = options.virtual_symbol
 	end
 	return item
 end
@@ -250,7 +264,6 @@ end
 ---Callback to manually show the highlights
 function M.turn_on()
 	local buffers = vim.fn.getbufinfo({ buflisted = true })
-
 	for _, buffer in ipairs(buffers) do
 		M.refresh_highlights(buffer.bufnr, false)
 	end
@@ -261,7 +274,6 @@ end
 ---Callback to manually hide the highlights
 function M.turn_off()
 	local buffers = vim.fn.getbufinfo({ buflisted = true })
-
 	for _, buffer in ipairs(buffers) do
 		M.clear_highlights(buffer.bufnr)
 	end
@@ -308,7 +320,6 @@ vim.api.nvim_create_autocmd({
 }, {
 	callback = M.handle_change_autocmd_callback,
 })
-
 vim.api.nvim_create_autocmd({
 	"VimResized",
 	"WinScrolled",
@@ -316,7 +327,7 @@ vim.api.nvim_create_autocmd({
 	callback = M.handle_autocmd_callback,
 })
 
-vim.api.nvim_create_user_command("Colors", function(opts)
+vim.api.nvim_create_user_command("HighlightColors", function(opts)
 	local arg = string.lower(opts.fargs[1])
 	if arg == "on" then
 		M.turn_on()

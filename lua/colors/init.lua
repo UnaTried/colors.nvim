@@ -62,10 +62,7 @@ local function validate_displays(user_display)
 			end
 		end
 		if has_background and has_foreground then
-			vim.notify(
-				"You cannot use background and foreground at the same time, colors.nvim is disabled!",
-				"error"
-			)
+			vim.notify("You cannot use background and foreground at the same time, colors.nvim is disabled!", "error")
 			M.turn_off()
 			vim.api.nvim_del_user_command("Colors")
 		end
@@ -73,8 +70,6 @@ local function validate_displays(user_display)
 
 	return filtered_display
 end
-
-
 
 ---Plugin entry point
 ---@param user_options table Check 'options' variable above
@@ -150,13 +145,7 @@ function M.highlight_colors(min_row, max_row, active_buffer_id)
 		end
 	end
 
-	local positions = buffer_utils.get_positions_by_regex(
-		patterns,
-		min_row - 1,
-		max_row,
-		active_buffer_id,
-		row_offset
-	)
+	local positions = buffer_utils.get_positions_by_regex(patterns, min_row - 1, max_row, active_buffer_id, row_offset)
 	for _, data in pairs(positions) do
 		for _, display_type in ipairs(options.display) do
 			utils.create_highlight(
@@ -332,7 +321,7 @@ vim.api.nvim_create_autocmd({
 	callback = M.handle_autocmd_callback,
 })
 
-vim.api.nvim_create_user_command("HighlightColors", function(opts)
+vim.api.nvim_create_user_command("Colors", function(opts)
 	local arg = string.lower(opts.fargs[1])
 	if arg == "on" then
 		M.turn_on()

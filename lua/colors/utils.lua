@@ -46,8 +46,7 @@ end
 ---* `label`: A string representing a template for the color name, likely using placeholders for the theme name. (e.g., '%-%-theme%-primary%-color')
 ---* `color`: A string representing the actual color value in a valid format (e.g., '#0f1219').
 function M.create_highlight(active_buffer_id, ns_id, data, options)
-	local color_value =
-		colors.get_color_value(data.value, 2, options.custom_colors, options.enable_short_hex)
+	local color_value = colors.get_color_value(data.value, 2, options.custom_colors, options.enable_short_hex)
 
 	if color_value == nil then
 		return
@@ -59,7 +58,6 @@ function M.create_highlight(active_buffer_id, ns_id, data, options)
 	local inverted_background_color = colors.get_inverted_background_color()
 
 	if color_value == background_color then
-		print("BG is == HEX")
 		if options.display == M.displays.background then
 			pcall(vim.api.nvim_set_hl, 0, highlight_group, {
 				fg = inverted_background_color,
@@ -115,8 +113,7 @@ function M.highlight_extmarks(active_buffer_id, ns_id, data, highlight_group, op
 	local start_extmark_row = data.row + 1
 	local start_extmark_column = data.start_column - 1
 	local symbol_text_position = M.get_symbol_text_position(options)
-	local symbol_text_column =
-		M.get_symbol_text_column(symbol_text_position, start_extmark_column, data.end_column)
+	local symbol_text_column = M.get_symbol_text_column(symbol_text_position, start_extmark_column, data.end_column)
 	local already_highlighted_extmark = vim.api.nvim_buf_get_extmarks(
 		active_buffer_id,
 		ns_id,
@@ -124,14 +121,11 @@ function M.highlight_extmarks(active_buffer_id, ns_id, data, highlight_group, op
 		{ start_extmark_row, symbol_text_column },
 		{ details = true }
 	)
-	local is_already_highlighted = #table_utils.filter(
-		already_highlighted_extmark,
-		function(extmark)
-			local extmark_data = vim.deepcopy(extmark[4])
-			local extmark_highlight_group = extmark_data.sym_text[1][2]
-			return extmark_highlight_group == highlight_group
-		end
-	) > 0
+	local is_already_highlighted = #table_utils.filter(already_highlighted_extmark, function(extmark)
+		local extmark_data = vim.deepcopy(extmark[4])
+		local extmark_highlight_group = extmark_data.sym_text[1][2]
+		return extmark_highlight_group == highlight_group
+	end) > 0
 	if is_already_highlighted then
 		return
 	end
@@ -197,13 +191,7 @@ function M.highlight_with_lsp(active_buffer_id, ns_id, positions, options)
 	for _, client in pairs(clients) do
 		if client.server_capabilities.colorProvider then
 			client.request("textDocument/documentColor", param, function(_, response)
-				M.highlight_lsp_document_color(
-					response,
-					active_buffer_id,
-					ns_id,
-					positions,
-					options
-				)
+				M.highlight_lsp_document_color(response, active_buffer_id, ns_id, positions, options)
 			end, active_buffer_id)
 		end
 	end
@@ -222,11 +210,7 @@ function M.highlight_lsp_document_color(response, active_buffer_id, ns_id, posit
 	end
 
 	for _, match in pairs(response) do
-		local r, g, b, a =
-			match.color.red or 0,
-			match.color.green or 0,
-			match.color.blue or 0,
-			match.color.alpha or 0
+		local r, g, b, a = match.color.red or 0, match.color.green or 0, match.color.blue or 0, match.color.alpha or 0
 		local value = string.format("#%02x%02x%02x", r * a * 255, g * a * 255, b * a * 255)
 		local range = match.range
 		local start_column = range.start.character

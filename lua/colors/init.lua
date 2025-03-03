@@ -62,17 +62,19 @@ local function validate_displays(user_display)
 			end
 		end
 		if has_background and has_foreground then
-			for i, v in ipairs(filtered_display) do
-				if v == displays.foreground then
-					filtered_display[i] = displays.symbol
-					break
-				end
-			end
+			vim.notify(
+				"You cannot use background and foreground at the same time, colors.nvim is disabled!",
+				"error"
+			)
+			M.turn_off()
+			vim.api.nvim_del_user_command("Colors")
 		end
 	end
 
 	return filtered_display
 end
+
+
 
 ---Plugin entry point
 ---@param user_options table Check 'options' variable above
@@ -91,6 +93,7 @@ function M.setup(user_options)
 			end
 		end
 	end
+	-- M.create_command()
 end
 
 ---Highlight visible colors within specified buffer id

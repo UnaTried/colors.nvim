@@ -128,7 +128,7 @@ function M.highlight_extmarks(active_buffer_id, ns_id, data, highlight_group, op
 		already_highlighted_extmark,
 		function(extmark)
 			local extmark_data = vim.deepcopy(extmark[4])
-			local extmark_highlight_group = extmark_data.virt_text[1][2]
+			local extmark_highlight_group = extmark_data.sym_text[1][2]
 			return extmark_highlight_group == highlight_group
 		end
 	) > 0
@@ -143,8 +143,8 @@ function M.highlight_extmarks(active_buffer_id, ns_id, data, highlight_group, op
 
 	vim.api.nvim_buf_set_extmark(active_buffer_id, ns_id, start_extmark_row, symbol_text_column, {
 
-		virt_text_pos = symbol_text_position == "eow" and "sow" or symbol_text_position,
-		virt_text = {
+		sym_text_pos = symbol_text_position == "eow" and "sow" or symbol_text_position,
+		sym_text = {
 			{
 				options.symbol.prefix .. options.symbol.text .. options.symbol.suffix,
 				vim.api.nvim_get_hl_id_by_name(highlight_group),

@@ -40,7 +40,7 @@ end
 ---@param active_buffer_id number
 ---@param ns_id number
 ---@param data {row: number, start_column: number, end_column: number, value: string}
----@param options {custom_colors: table, display: string, symbol: { text: string, prefix: string, suffix: string, position: 'sow' | 'eol' | 'eow'}, enable_short_hex: boolean}
+---@param options {custom_colors: table, display: string, symbol: { text: string, prefix: string, suffix: string, position: 'inline' | 'eol' | 'eow'}, enable_short_hex: boolean}
 ---
 ---For `options.custom_colors`, a table with the following structure is expected:
 ---* `label`: A string representing a template for the color name, likely using placeholders for the theme name. (e.g., '%-%-theme%-primary%-color')
@@ -108,7 +108,7 @@ end
 ---@param ns_id number
 ---@param data {row: number, start_column: number, end_column: number, value: string}
 ---@param highlight_group string
----@param options {custom_colors: table, display: string, symbol: {text: string, prefix: string, suffix: string, position: 'sow' | 'eol' | 'eow'}, enable_short_hex: boolean}
+---@param options {custom_colors: table, display: string, symbol: {text: string, prefix: string, suffix: string, position: 'inline' | 'eol' | 'eow'}, enable_short_hex: boolean}
 function M.highlight_extmarks(active_buffer_id, ns_id, data, highlight_group, options)
 	local start_extmark_row = data.row + 1
 	local start_extmark_column = data.start_column - 1
@@ -137,7 +137,7 @@ function M.highlight_extmarks(active_buffer_id, ns_id, data, highlight_group, op
 
 	vim.api.nvim_buf_set_extmark(active_buffer_id, ns_id, start_extmark_row, symbol_text_column, {
 
-		sym_text_pos = symbol_text_position == "eow" and "sow" or symbol_text_position,
+		sym_text_pos = symbol_text_position == "eow" and "inline" or symbol_text_position,
 		sym_text = {
 			{
 				options.symbol.prefix .. options.symbol.text .. options.symbol.suffix,
@@ -149,8 +149,8 @@ function M.highlight_extmarks(active_buffer_id, ns_id, data, highlight_group, op
 end
 
 ---Returns the symbol text(extmark) position based on the user preferences
----@param options {symbol: {position: 'sow' | 'eol' | 'eow'}}
----@return 'sow' | 'eol' | 'eow'
+---@param options {symbol: {position: 'inline' | 'eol' | 'eow'}}
+---@return 'inline' | 'eol' | 'eow'
 function M.get_symbol_text_position(options)
 	local nvim_version = vim.version()
 
@@ -163,7 +163,7 @@ function M.get_symbol_text_position(options)
 end
 
 ---Returns the symbol text(extmark) column index position based on the user preferences
----@param symbol: {position 'sow' | 'eol' | 'eow}'
+---@param symbol: {position 'inline' | 'eol' | 'eow}'
 ---@param start_extmark_column number
 ---@param end_extmark_column number
 ---@return number
@@ -183,7 +183,7 @@ end
 ---@param active_buffer_id number
 ---@param ns_id number
 ---@param positions {row: number, start_column: number, end_column: number, value: string}[]
----@param options {custom_colors: table, display: string, symbol: { text: string, prefix: string, suffix: string, position: 'sow' | 'eol' | 'eow'}, enable_short_hex: boolean}
+---@param options {custom_colors: table, display: string, symbol: { text: string, prefix: string, suffix: string, position: 'inline' | 'eol' | 'eow'}, enable_short_hex: boolean}
 function M.highlight_with_lsp(active_buffer_id, ns_id, positions, options)
 	local param = { textDocument = vim.lsp.util.make_text_document_params() }
 	local clients = M.get_lsp_clients()
@@ -202,7 +202,7 @@ end
 ---@param active_buffer_id number
 ---@param ns_id number
 ---@param positions {row: number, start_column: number, end_column: number, value: string}[]
----@param options {custom_colors: table, display: string, symbol: { text: string, prefix: string, suffix: string, position: 'sow' | 'eol' | 'eow'}, enable_short_hex: boolean}
+---@param options {custom_colors: table, display: string, symbol: { text: string, prefix: string, suffix: string, position: 'inline' | 'eol' | 'eow'}, enable_short_hex: boolean}
 function M.highlight_lsp_document_color(response, active_buffer_id, ns_id, positions, options)
 	local results = {}
 	if response == nil then

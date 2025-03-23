@@ -62,7 +62,12 @@ local function validate_displays(user_display)
 			end
 		end
 		if has_background and has_foreground then
-			vim.notify("You cannot use background and foreground at the same time, colors.nvim is disabled!", "error")
+			vim.api.nvim_echo(
+				"You cannot use background and foreground at the same time, colors.nvim is disabled!",
+				"ErrorMsg",
+				true,
+				{}
+			)
 			M.turn_off()
 			vim.api.nvim_del_user_command("Colors")
 		end

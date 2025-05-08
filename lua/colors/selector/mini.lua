@@ -1,1 +1,0 @@
-vim.fn.expand("<cword>")
